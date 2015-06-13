@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "AntiXSS-Auditor",
+    "version": "1.2.1",
+    "description": "An audit assistant for finding AntiXSS vulnerabilities",
+    "icons": {
+        "128": "ico/logo_128.png",
+        "48": "ico/logo_48.png"
+    },
+    "permissions": [
+        "tabs",
+        "<all_urls>"
+    ],
+    "background": {
+        "scripts": ["js/background.js"]
+    },
+    "devtools_page": "devtools.html",
+    "content_security_policy": "default-src 'self'  chrome-extension-resource: ; style-src 'self' ; script-src 'self' 'unsafe-eval';  connect-src *; frame-src *;",
+    "web_accessible_resources":
+    [
+      "*"
+    ]
+}

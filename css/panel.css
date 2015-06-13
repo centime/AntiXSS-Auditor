@@ -1,0 +1,148 @@
+@font-face {
+    font-family: 'Raleway';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Raleway'), url(../other/Raleway.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    padding: 10px;
+}
+
+.intro {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -215px;
+    margin-top: -35px;
+}
+
+nav {
+    position: fixed;
+    z-index: 1;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+}
+
+nav > button {
+    margin-bottom: 0;
+    background: white;
+}
+
+.top {
+    opacity: 1;
+    transition: opacity 300ms;
+}
+
+.top.hidden {
+    pointer-entry-points: none;
+    opacity: 0;
+}
+
+.status {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: rgba(139, 0, 0, 0.5);
+    font-size: small;
+    z-index: 1;
+    cursor: help;
+}
+
+.status.connected {
+    display: none;
+}
+
+.entry-points {
+    margin-bottom: 50px;
+    table-layout: fixed;
+}
+
+.entry-points thead th {
+    vertical-align: bottom;
+}
+
+.entry-points thead th input[type=text] {
+    margin-bottom: 9px;
+    height: 30px;
+    font-weight: normal;
+    width: 100%;
+    min-width: 55px;
+}
+
+.entry-points thead th .checkbox {
+    margin-bottom: 9px;
+}
+
+.entry-points td {
+    word-wrap: break-word;
+}
+
+.entry-points td:first-child {
+    border-left: solid transparent 5px;
+    padding-left: 4px;
+}
+
+.entry-points tr.event-elements td:first-child {
+    border-left-color: rgb(138,219,246);
+}
+
+.entry-points tr.nodes-removed td:first-child {
+    border-left-color: rgb(255,198,139);
+}
+
+.entry-points tr.text-changed td:first-child {
+    border-left-color: rgb(254,239,139);
+}
+
+.entry-points tr.attribute-changed td:first-child {
+    border-left-color: rgb(179,146,248);
+}
+
+.entry-points th:nth-child(1), .entry-points td:nth-child(1) {
+    min-width: 155px;
+}
+
+.entry-points th:nth-child(3), .entry-points td:nth-child(3) {
+    width: 60%;
+}
+
+.entry-points td > div {
+    max-height: 85px;
+    overflow: auto;
+}
+
+.entry-points td:nth-child(3) hr {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.entry-points thead .counter {
+    color: rgba(34, 34, 34, 0.33);
+}
+
+.node:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+div.expandable {
+    cursor: pointer;
+    height: 20px;
+    overflow: hidden;
+    word-break: break-all;
+}
+.expandable-container { 
+    height: 20px; 
+    overflow: visible; 
+    word-break: break-all;
+}

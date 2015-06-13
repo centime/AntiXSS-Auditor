@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="twitter:widgets:csp" content="on">
+
+    <title>AntiXSS</title>
+
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+<p class="status" title="Unable to contact content script. Try reloading the page.">(disconnected)</p>
+<nav>
+    <button class="button-primary record">Inspect</button>
+    <button class="clear">Clear</button>
+    <button class="top hidden">Top</button>
+</nav>
+<main>
+    <table class="entry-points u-full-width">
+        <thead>
+        <tr>
+            <th>
+                
+                Node <span class="counter">(0)</span>
+            </th>
+            <th>
+                Type
+            </th>
+            <th>Code</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</main>
+<aside class="intro">
+    <p>Click <em>"Inspect"</em> button below to inspect the page.</p>
+</aside>
+
+<script src="js/ContentScriptProxy.js"></script>
+<script src="js/EntryPointsTable.js"></script>
+<script src="js/ScrollHelper.js"></script>
+<script src="js/panel.js"></script>
+</body>
+</html>
