@@ -11,11 +11,13 @@
     var scrollHelper = new ScrollHelper(topBtn);
     var entryPointsTable = new EntryPointsTable(table);
 
-    var recording = false;
+    var inspectedURL;
 
     recordBtn.addEventListener('click', function () {
         entryPointsTable.clear();
-        ContentScriptProxy.findEventElements();
+        ContentScriptProxy.findHtmlAttributes();
+        ContentScriptProxy.findScripts();
+
 
         if (intro.style.display !== 'none') {
             var player = intro.animate([
@@ -37,20 +39,30 @@
         scrollHelper.scrollToTheTop();
     });
 
-    // clicking on a node
+    // clicking
     table.addEventListener('click', function (e) {
         var target = e.target;
 
+        // on a node
         if (target && target.classList.contains('node') && target.dataset.nodeid) {
             if (e.shiftKey) {
                 ContentScriptProxy.inspectNode(target.dataset.nodeid);
             } else {
-                if (target.classList.contains('eventElement')){         
+                if (target.classList.contains('htmlAttribute')){         
                     ContentScriptProxy.highlightNode(target.dataset.nodeid);
                 } else if (target.classList.contains('script')) {
                     // well..
                 }
             }
+        // on an "exploit" button
+        } else if (target && target.classList.contains('exploit') && target.dataset.exploit) {
+
+            bgPageConnection.postMessage({
+                type: 'new-tab',
+                url: inspectedURL + '#' + target.dataset.exploit, //todo what if 2 #'s ?
+                
+            });
+
         }
     }, false);
 
@@ -68,8 +80,9 @@
                 "js/content-scripts/jquery.min.js",
                 "js/content-scripts/jQuery-GetPath.js",
                 "js/content-scripts/Init.js",
-                "js/content-scripts/Parser.js",
                 "js/content-scripts/Highlighter.js",
+                "js/content-scripts/HtmlAttributes.js",
+                "js/content-scripts/Scripts.js",
                 "js/content-scripts/Ready.js"
                 ]
         });
@@ -81,7 +94,8 @@
 
     bgPageConnection.onMessage.addListener(function handleMessage(message) {
         if (message.type === 'connected') {
-            statusElem.classList.add('connected');
+            statusElem.classList.add('connected') ;
+            inspectedURL = message.url ;
 
             entryPointsTable.clear();
 
@@ -93,7 +107,7 @@
         } else if (message.type === 'entryPoint') {
             entryPointsTable.addEntryPoint(message.entryPoint);
             
-            if (message.entryPoint.vector === 'eventElement'){
+            if (message.entryPoint.vector === 'htmlAttribute'){
                 ContentScriptProxy.colorNode(message.entryPoint.node.nodeId);
             }
         }

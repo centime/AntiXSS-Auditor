@@ -1,0 +1,24 @@
+refactor
+	window.antiXSSExtension.scripts.method
+		module encapsulation
+
+dynamically created script: observer
+
+keywords !
+
+sanitizing !
+
+removability
+	emulation with missing scripts
+	diff
+
+	(observer for scripts, on load, from devtool)
+	get exploits for main
+	open new tabs with exploits
+		report DOM back to background
+
+
+
+criticity
+	database
+	evaluation

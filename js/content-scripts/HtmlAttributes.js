@@ -28,8 +28,9 @@
     	self.displayEntryPoint({
             vector: 'htmlAttribute',
             node: nodeToObject(node),   
-            type: this,                 // the event (onclick...)
-            code: $(node).attr(this)
+            details: this,                 // the event (onclick...)
+            code: $(node).attr(this),
+            exploit: node.outerHTML.substring(0,100) // todo
         });
     }
 

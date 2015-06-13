@@ -28,12 +28,16 @@
                         runAt: "document_start"
                     }, function () {
                         if (chrome.runtime.lastError) {
-                            console.log('Error injecting script', chrome.runtime.lastError);
+                            console.log('Error injecting script ',file, chrome.runtime.lastError);
                         }
                     });
                 }
 
                 Array.prototype.forEach.call(message.scriptsToInject, executeScript);
+
+            } else if (message.type === 'new-tab') {
+
+                chrome.tabs.create({ url: message.url });
 
             } else {
                 //pass message from DevTools panel to a content script

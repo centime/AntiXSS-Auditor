@@ -15,8 +15,11 @@
     }
 
     window.ContentScriptProxy = {
-        findEventElements: function () {
-            callCommand('antiXSSExtension.findEventElements()');
+        findHtmlAttributes: function () {
+            callCommand('antiXSSExtension.findHtmlAttributes()');
+        },
+        findScripts: function () {
+            callCommand('antiXSSExtension.findScripts()');
         },
         inspectNode: function (nodeId) {
             callCommand('inspect(antiXSSExtension.getNode(' + nodeId + '))');

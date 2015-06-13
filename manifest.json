@@ -9,13 +9,14 @@
     },
     "permissions": [
         "tabs",
-        "<all_urls>"
+        "<all_urls>",
+        "*://*/*"
     ],
     "background": {
         "scripts": ["js/background.js"]
     },
     "devtools_page": "devtools.html",
-    "content_security_policy": "default-src 'self'  chrome-extension-resource: ; style-src 'self' ; script-src 'self' 'unsafe-eval';  connect-src *; frame-src *;",
+    "content_security_policy": "default-src 'self'  chrome-extension-resource: ; style-src 'self' 'unsafe-inline'; script-src 'self';  connect-src *; frame-src *;",
     "web_accessible_resources":
     [
       "*"

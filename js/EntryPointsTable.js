@@ -2,25 +2,43 @@
     "use strict";
 
     function formatNode(entryPoint) {
-        return '<span class="node '+entryPoint.vector+'" data-nodeid="' + entryPoint.node.nodeId + '">' + entryPoint.node.selector + '</span>';
+        var d = document.createElement('span') ;
+        d.innerText = entryPoint.node.selector ;
+        d.dataset.nodeid = entryPoint.node.nodeId ;
+        d.classList.add('node');
+        d.classList.add(entryPoint.vector);
+        return d
     }
 
+    function formatButtons(entryPoint) {
+        var container, ex;
+        container = document.createElement('div') ;
+        ex = document.createElement('button') ;
+        ex.innerText = "exploit" ;
+        ex.dataset.exploit = entryPoint.exploit ;
+        ex.classList.add('exploit');
+        container.appendChild(ex);
+        return container
+    }
 
-    function formatType(entryPoint) {
-        var type = "";
-        switch (entryPoint.vector) {
-            case "eventElement":
-                type = '<em>' + entryPoint.type + '</em>';
-                break;
-        }
+    function formatNodeFromString(str) {
+        var d = document.createElement('span') ;
+        d.innerText = str ;
+        return d
+    }
 
-        return type;
+        function formatDetails(entryPoint) {
+        var d = document.createElement('em') ;
+        d.innerText = entryPoint.details ;
+        return d
     }
 
     function formatCode(code) {
         // Todo expand code
         // http://jsfiddle.net/retaF/8/
-        return '<span class="code">' + code + '</span>';
+        var d = document.createElement('div') ;
+        d.innerText = code ;
+        return d
     }
 
     function EntryPointsTable(table) {
@@ -42,9 +60,10 @@
         this._updateEntryPointCounter();
     };
 
-    EntryPointsTable.prototype.addEntryPoint = function (entryPoint) {
+
+    EntryPointsTable.prototype.createEntry = function (node, details, code, buttons, vector) {
         
-        var tdNode, tdType, tdCode, tr;
+        var tr, tdNode, tdDetails, tdCode, tdBtns;
 
 
         // // TODO expand groups
@@ -66,22 +85,25 @@
 
         tr = document.createElement('tr');
         tdNode = document.createElement('td');
-        tdType = document.createElement('td');
+        tdDetails = document.createElement('td');
         tdCode = document.createElement('td');
+        tdBtns = document.createElement('td');
 
-        tr.dataset.code = entryPoint.code; // todo : full code unescaped. WTF am I doing ?
-        tr.dataset.type = entryPoint.type;
-        tr.dataset.count = parseInt(tr.dataset.count || "1", 10);
+        // tr.dataset.code = entryPoint.code; // todo : full code unescaped. WTF am I doing ?
+        // tr.dataset.details = entryPoint.details;
+        // tr.dataset.count = parseInt(tr.dataset.count || "1", 10);
 
-        tr.classList.add(entryPoint.vector.replace(' ', '-'));
+        tr.classList.add(vector);
 
-        tdNode.innerHTML = '<div>' + formatNode(entryPoint) + '</div>';
-        tdType.innerHTML = '<div>' + formatType(entryPoint) + '</div>';
-        tdCode.innerHTML = '<div>' + formatCode(entryPoint.code) + '</div>';
+        tdNode.appendChild( node ) ;
+        tdDetails.appendChild( details ) ;
+        tdCode.appendChild( code ) ;
+        tdBtns.appendChild( buttons ) ;
 
         tr.appendChild(tdNode);
-        tr.appendChild(tdType);
+        tr.appendChild(tdDetails);
         tr.appendChild(tdCode);
+        tr.appendChild(tdBtns);
 
         //insert at the top/beginning
         (this._tableBody).insertBefore(tr, this._tableBody.firstChild);
@@ -95,6 +117,34 @@
         this._updateEntryPointCounter();
 
     };
+
+
+    EntryPointsTable.prototype.addEntryPoint = function (entryPoint) { 
+
+        var node, details, code, buttons ;
+
+        details = formatDetails(entryPoint) ;
+        code = formatCode(entryPoint.code) ;
+
+        switch (entryPoint.vector) {
+            case "htmlAttribute":
+                node = formatNode(entryPoint) ;
+                buttons = formatButtons(entryPoint) ;
+                break;
+            case "inline":
+                node = formatNodeFromString("Inline script") ;
+                break;
+            case "external":
+                node = formatNodeFromString(entryPoint.src) ;
+                break;
+
+        }
+
+        buttons = buttons || document.createElement('span') ;
+
+        this.createEntry( node, details, code, buttons, entryPoint.vector );
+    };
+
 
     window.EntryPointsTable = EntryPointsTable;
 

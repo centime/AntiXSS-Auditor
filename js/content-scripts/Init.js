@@ -25,6 +25,7 @@
     function sendConnected(){
       bgPageConnection.postMessage({
           type: 'connected',
+          url: document.location.href
       });
     }
 
