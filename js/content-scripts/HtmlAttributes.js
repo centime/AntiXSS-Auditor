@@ -10,27 +10,25 @@
     var nodeRegistry = [];
 
     function nodeToObject (node) {
-    	
-		var nodeId = nodeRegistry.indexOf(node);
+        
+        var nodeId = nodeRegistry.indexOf(node);
 
         if (nodeId === -1) {
             nodeRegistry.push(node);
             nodeId = nodeRegistry.length - 1;
         }
 
-        return {
-            selector: $(node).getPath(),
-            nodeId: nodeId
-        };
+        return nodeId
     }
 
     function logNode(node){
-    	self.displayEntryPoint({
-            vector: 'htmlAttribute',
-            node: nodeToObject(node),   
+    	self.sendEntryPoint({
+            vector: this === "onload" ? "passive":"active", // todo onerror etc.
+            source: $(node).getPath(),   
             details: this,                 // the event (onclick...)
             code: $(node).attr(this),
-            exploit: node.outerHTML.substring(0,100) // todo
+            exploit: encodeURIComponent(node.outerHTML), // todo
+            nodeId: nodeToObject(node)
         });
     }
 
@@ -43,18 +41,13 @@
  		Array.prototype.forEach.call(blacklist, findKeyword);
  	}
 
-    function getSelector(nodeId) {
-        return $(nodeRegistry[nodeId]).getPath()
-    }
-
     function getNode(nodeId) {
         return nodeRegistry[nodeId]
     }
 
-   	self.extend({
-   		findHtmlAttributes: findHtmlAttributes,
-        getNode: getNode,
-        getSelector: getSelector
+    self.extend({
+        findHtmlAttributes: findHtmlAttributes,
+        getNode: getNode
     });
 
 })(window.antiXSSExtension);

@@ -4,6 +4,7 @@
     var statusElem = document.querySelector('.status');
     var clearBtn = document.querySelector('.clear');
     var recordBtn = document.querySelector('.record');
+    var analyzeAllBtn = document.querySelector('.analyze-all');
     var topBtn = document.querySelector('.top');
     var table = document.querySelector('.entry-points');
     var intro = document.querySelector('.intro');
@@ -12,6 +13,9 @@
     var entryPointsTable = new EntryPointsTable(table);
 
     var inspectedURL;
+    var originalDOM;
+    var entryPointsRegistry = [];
+    var cripplingExploit = {};
 
     recordBtn.addEventListener('click', function () {
         entryPointsTable.clear();
@@ -31,8 +35,27 @@
         }
     });
 
+    analyzeAllBtn.addEventListener('click', function () {
+
+        var i=0;
+        Array.prototype.forEach.call(entryPointsRegistry, function(ep){
+            if ( (ep.vector === 'passive') && !(ep.diff) ){
+                bgPageConnection.postMessage({
+                    type: 'analyze',
+                    url: inspectedURL,
+                    exploit: ep.exploit, //todo what if 2 #'s ?
+                });
+            }
+        });
+
+
+
+    });
     clearBtn.addEventListener('click', function () {
         entryPointsTable.clear();
+
+        entryPointsRegistry = [];
+        cripplingExploit = {};
     });
 
     topBtn.addEventListener('click', function () {
@@ -44,23 +67,34 @@
         var target = e.target;
 
         // on a node
-        if (target && target.classList.contains('node') && target.dataset.nodeid) {
-            if (e.shiftKey) {
-                ContentScriptProxy.inspectNode(target.dataset.nodeid);
-            } else {
-                if (target.classList.contains('htmlAttribute')){         
-                    ContentScriptProxy.highlightNode(target.dataset.nodeid);
-                } else if (target.classList.contains('script')) {
-                    // well..
+        if (target && target.classList.contains('node') ) {   
+            // an "active" entryPoint. Highlight just that.
+            if (target.dataset.nodeId){
+
+                ContentScriptProxy.highlightNode( target.dataset.nodeId );
+
+            } else if (target.dataset.entryPointId) {
+                var diff = entryPointsRegistry[target.dataset.entryPointId].diff ;
+                if (diff) {
+                    Array.prototype.forEach.call( diff.removed, ContentScriptProxy.highlight );
                 }
             }
-        // on an "exploit" button
-        } else if (target && target.classList.contains('exploit') && target.dataset.exploit) {
+
+        //on an "exploit" button
+        } else if (target && target.classList.contains('exploit') ) {
 
             bgPageConnection.postMessage({
-                type: 'new-tab',
-                url: inspectedURL + '#' + target.dataset.exploit, //todo what if 2 #'s ?
-                
+                type: 'exploit',
+                url: inspectedURL,
+                exploit: entryPointsRegistry[target.dataset.entryPointId].exploit, //todo what if 2 #'s ?
+            });
+        // on an "analyze" button
+        } else if (target && target.classList.contains('analyze') ) {
+
+            bgPageConnection.postMessage({
+                type: 'analyze',
+                url: inspectedURL,
+                exploit: entryPointsRegistry[target.dataset.entryPointId].exploit, //todo what if 2 #'s ?
             });
 
         }
@@ -92,24 +126,68 @@
         name: "devtools-page"
     });
 
+    function getEntryPointId(entryPoint) {
+        var id = entryPointsRegistry.indexOf(entryPoint);
+
+        if (id === -1) {
+            entryPointsRegistry.push(entryPoint);
+            id = entryPointsRegistry.length - 1;
+        }
+        return id
+    }
+
     bgPageConnection.onMessage.addListener(function handleMessage(message) {
-        if (message.type === 'connected') {
-            statusElem.classList.add('connected') ;
-            inspectedURL = message.url ;
 
-            entryPointsTable.clear();
+        switch (message.type) {
 
-        } else if (message.type === 'disconnected') {
-            statusElem.classList.remove('connected');
+            case 'connected':
+                statusElem.classList.add('connected') ;
+                inspectedURL = message.url ;
 
-            injectContentScript();
+                entryPointsTable.clear();
+                break;
 
-        } else if (message.type === 'entryPoint') {
-            entryPointsTable.addEntryPoint(message.entryPoint);
-            
-            if (message.entryPoint.vector === 'htmlAttribute'){
-                ContentScriptProxy.colorNode(message.entryPoint.node.nodeId);
-            }
+            case 'disconnected':
+                statusElem.classList.remove('connected');
+
+                injectContentScript();
+                break;
+
+            case 'entryPoint':
+                var entryPointId = getEntryPointId(message.entryPoint);
+                entryPointsTable.addEntryPoint(message.entryPoint, entryPointId);
+                
+                if (message.entryPoint.vector === 'active'){
+                    ContentScriptProxy.colorNode(message.entryPoint.nodeId);
+                }
+                break;
+
+            // This is where we fetch the DOMs to "analyze"
+            case 'DOM':
+                if (message.original) {
+                    originalDOM = message.DOM ;
+                } else {
+                    var exploit = cripplingExploit[message.id];
+                    var diff = DOMDiff(originalDOM, message.DOM);
+
+                    // all the entryPoints with the same exploit will have the same impact. Group update.
+                    for (var i=0; i<entryPointsRegistry.length; i++){ // todo : nasty loop is nasty
+
+                        if ( entryPointsRegistry[i].exploit === exploit ){
+                            entryPointsRegistry[i].diff = diff ;
+                            entryPointsTable.update( i, diff );
+
+                        }
+                    }
+
+                }
+                break;
+
+            case 'exploitId':
+                // id of the page in which the exploit is being tested
+                cripplingExploit[message.id] = message.exploit ;
+                break;
+
         }
     });
 

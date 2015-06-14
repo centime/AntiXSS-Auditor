@@ -12,22 +12,8 @@
     };
 
     var bgPageConnection = chrome.runtime.connect({
-        name: "content-script"
+        name: "analyze"
     });
-
-    function sendEntryPoint(e) {
-        bgPageConnection.postMessage({
-            type: 'entryPoint',
-            entryPoint: e
-        });
-    }
-
-    function sendConnected(){
-      bgPageConnection.postMessage({
-          type: 'connected',
-          url: document.location.href
-      });
-    }
 
     function sendDOM(DOM) {
         bgPageConnection.postMessage({
@@ -36,9 +22,8 @@
         });
     }
 
+
     window.antiXSSExtension.extend({
-        sendEntryPoint: sendEntryPoint,
-        sendConnected: sendConnected,
         sendDOM: sendDOM
     });
 

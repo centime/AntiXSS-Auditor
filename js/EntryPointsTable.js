@@ -1,35 +1,26 @@
 (function () {
     "use strict";
 
-    function formatNode(entryPoint) {
+    function formatSource(source) {
         var d = document.createElement('span') ;
-        d.innerText = entryPoint.node.selector ;
-        d.dataset.nodeid = entryPoint.node.nodeId ;
-        d.classList.add('node');
-        d.classList.add(entryPoint.vector);
+        d.innerText = source ;
+        d.classList.add('source');
         return d
     }
 
-    function formatButtons(entryPoint) {
-        var container, ex;
-        container = document.createElement('div') ;
-        ex = document.createElement('button') ;
-        ex.innerText = "exploit" ;
-        ex.dataset.exploit = entryPoint.exploit ;
-        ex.classList.add('exploit');
-        container.appendChild(ex);
-        return container
+    function formatButton(type, entryPointId) {
+        var ex = document.createElement('button') ;
+        ex.innerText = type ;
+        ex.classList.add(type);
+        ex.dataset.entryPointId = entryPointId ;
+        return ex
     }
 
-    function formatNodeFromString(str) {
-        var d = document.createElement('span') ;
-        d.innerText = str ;
-        return d
-    }
 
-        function formatDetails(entryPoint) {
+    function formatDetails(details, entryPointId) {
         var d = document.createElement('em') ;
-        d.innerText = entryPoint.details ;
+        d.innerText = details ;
+        d.classList.add('details');
         return d
     }
 
@@ -38,6 +29,7 @@
         // http://jsfiddle.net/retaF/8/
         var d = document.createElement('div') ;
         d.innerText = code ;
+        d.classList.add('code');
         return d
     }
 
@@ -61,9 +53,9 @@
     };
 
 
-    EntryPointsTable.prototype.createEntry = function (node, details, code, buttons, vector) {
+    EntryPointsTable.prototype.createEntry = function (entryPointId, source, details, code, buttons) {
         
-        var tr, tdNode, tdDetails, tdCode, tdBtns;
+        var tr, tdSource, tdDetails, tdCode, tdBtns;
 
 
         // // TODO expand groups
@@ -84,23 +76,19 @@
         // }
 
         tr = document.createElement('tr');
-        tdNode = document.createElement('td');
+        tr.id = 'id-'+entryPointId ;
+        tdSource = document.createElement('td');
         tdDetails = document.createElement('td');
         tdCode = document.createElement('td');
         tdBtns = document.createElement('td');
 
-        // tr.dataset.code = entryPoint.code; // todo : full code unescaped. WTF am I doing ?
-        // tr.dataset.details = entryPoint.details;
-        // tr.dataset.count = parseInt(tr.dataset.count || "1", 10);
 
-        tr.classList.add(vector);
-
-        tdNode.appendChild( node ) ;
+        tdSource.appendChild( source ) ;
         tdDetails.appendChild( details ) ;
         tdCode.appendChild( code ) ;
         tdBtns.appendChild( buttons ) ;
 
-        tr.appendChild(tdNode);
+        tr.appendChild(tdSource);
         tr.appendChild(tdDetails);
         tr.appendChild(tdCode);
         tr.appendChild(tdBtns);
@@ -119,30 +107,84 @@
     };
 
 
-    EntryPointsTable.prototype.addEntryPoint = function (entryPoint) { 
+    EntryPointsTable.prototype.addEntryPoint = function (entryPoint, entryPointId) { 
 
-        var node, details, code, buttons ;
+        var source, details, code, buttons ;
 
-        details = formatDetails(entryPoint) ;
-        code = formatCode(entryPoint.code) ;
 
+        source = formatSource( entryPoint.source );
+
+        details = formatDetails( entryPoint.details, entryPointId );
+
+        code = formatCode( entryPoint.code );
+
+        buttons = document.createElement('div') ;
+        buttons.appendChild( 
+            formatButton( 'exploit', entryPointId ) 
+        );
+        
         switch (entryPoint.vector) {
-            case "htmlAttribute":
-                node = formatNode(entryPoint) ;
-                buttons = formatButtons(entryPoint) ;
-                break;
-            case "inline":
-                node = formatNodeFromString("Inline script") ;
-                break;
-            case "external":
-                node = formatNodeFromString(entryPoint.src) ;
+            case "active":
+                source.classList.add('node');
+                source.classList.add('htmlAttribute');
+                source.classList.add('active');
+                source.dataset.nodeId = entryPoint.nodeId;
+                break
+            case "passive":
+                buttons.appendChild( 
+                    formatButton( 'analyze', entryPointId ) 
+                );
                 break;
 
         }
 
-        buttons = buttons || document.createElement('span') ;
+        this.createEntry( entryPointId, source, details, code, buttons );
+    };
 
-        this.createEntry( node, details, code, buttons, entryPoint.vector );
+    function formatDetail(str){
+        var d = document.createElement('div') ;
+        d.innerText = str ;
+        return d
+    }
+
+    EntryPointsTable.prototype.updateDetails = function ( node, diff) { 
+
+        var details = node.querySelector('.details');
+
+        details.innerHTML = "";
+        details.appendChild( formatDetail( 
+            "impact: "+Math.round(100*diff.removed.length/diff.total)+'%'
+        ) );
+
+    };
+
+    EntryPointsTable.prototype.updateSource = function ( node, entryPointId) { 
+
+        var source = node.querySelector('.source');
+
+        source.classList.add('node');
+        source.classList.add('htmlAttribute');
+        source.classList.add('active');
+        source.dataset.entryPointId = entryPointId;
+
+    };
+
+    EntryPointsTable.prototype.updateButtons = function ( node ) { 
+
+        var analyzeBtn = node.querySelector('.analyze');
+        analyzeBtn.parentElement.removeChild(analyzeBtn); // WTF ? http://stackoverflow.com/questions/3387427/remove-element-by-id
+
+    };
+
+    EntryPointsTable.prototype.update = function ( entryPointId, diff) {
+
+        var row = (this._tableBody).querySelector('#id-'+entryPointId);
+        if (row){
+            this.updateSource(row, entryPointId);
+            this.updateDetails(row, diff);
+            this.updateButtons(row);
+        }
+
     };
 
 

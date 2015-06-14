@@ -2,21 +2,18 @@
     "use strict";
     //todo dynamically created script
 
-    function type (script) {
-        return $(script).attr('src') ? 'external' : 'inline'
-    }
-
     function logScript (script,code) {
-        self.displayEntryPoint({
-            vector: type(script),     // external or inline
-            details: "todo: 5%",              // impact on the page
+        self.sendEntryPoint({
+            vector: "passive",     
+            source: (script.src || "inline script"),
+            details: "Run 'analyze'",              // impact on the page
             code: code,
-            src: (script.src || "")
+            exploit: encodeURIComponent(script.outerHTML)//.substring(0,100) // todo
         });
     }
 
     function getCode (script, cb){
-        if ( type(script) === 'inline' ) {
+        if ( !($(script).attr('src')) ) {
 
             cb(script, script.text);
 

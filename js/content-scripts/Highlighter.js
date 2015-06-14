@@ -44,9 +44,17 @@
         blinkNode(node);
     }
 
+    function show(selector){
+        Array.prototype.forEach.call( $(selector), function(n){
+            scrollIntoView(n);
+            blinkNode(n)
+        });
+    }
+
     self.extend({
         showNode: showNode,
-        colorNode: colorNode
+        colorNode: colorNode,
+        show: show
     });
 
 })(window.antiXSSExtension);

@@ -21,14 +21,14 @@
         findScripts: function () {
             callCommand('antiXSSExtension.findScripts()');
         },
-        inspectNode: function (nodeId) {
-            callCommand('inspect(antiXSSExtension.getNode(' + nodeId + '))');
-        },
         highlightNode: function (nodeId) {   ;
             callCommand('antiXSSExtension.showNode(antiXSSExtension.getNode(' + nodeId + '))');
         },
         colorNode: function (nodeId) {
             callCommand('antiXSSExtension.colorNode(antiXSSExtension.getNode(' + nodeId + '))');
-        }
+        },
+        highlight: function (selector) {   ;
+            callCommand('antiXSSExtension.show("' + selector + '")');
+        },
     };
 })();
